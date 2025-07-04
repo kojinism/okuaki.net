@@ -31,14 +31,23 @@
       text-align: center;
     }
     /* Add subtle text shadow for readability */
-    h1, #joke, #ownerMsg, #ownerNote {
+    h1, #introNote, #joke, #ownerMsg, #ownerNote {
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
     }
-    header { flex: 0; padding-top: 2vh; }
+    header {
+      flex: 0;
+      padding-top: 2vh;
+      /* Bounce header content together */
+      animation: bounce 2s infinite;
+    }
     header h1 {
       font-size: clamp(2.5rem, 8vw, 4rem);
-      animation: bounce 2s infinite;
       margin: 0;
+    }
+    header #introNote {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin: 0.5rem 0 0;
     }
     @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
     main {
@@ -119,7 +128,8 @@
 <body>
   <header>
     <br>
-    <h1>Welcome! What brought you here?</h1>
+    <h1>Welcome to my silly site!</h1>
+    <p id="introNote">What brought you here?</p>
   </header>
   <main>
     <button id="laughBtn">Make me laugh 😆</button>
