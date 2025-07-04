@@ -1,0 +1,12 @@
+name = "Okuaki.net"
+type = "javascript"
+
+[build]
+upload_format = "service-worker"
+
+[env.production]
+# Leave build.command empty since you're using Pages Functions
+# Add your KV namespace binding here:
+kv_namespaces = [
+  { binding = "MESSAGES", id = "<YOUR_MESSAGES_NAMESPACE_ID>" }
+]

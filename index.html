@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Okuaki’s Playground</title>
+  <!-- Fun Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      /* Ember Glow: charcoal to ember red gradient */
+      --bg1: #1c1c1c;
+      --bg2: #4a2e2e;
+      --bg3: #7f3f3f;
+      --text: #f5e9e2;
+    }
+    html, body {
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      font-family: "Fredoka One", cursive;
+      background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 60%, var(--bg3) 100%);
+      color: var(--text);
+      text-align: center;
+    }
+    /* Add subtle text shadow for readability */
+    h1, #joke, #ownerMsg, #ownerNote {
+      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+    }
+    header { flex: 0; padding-top: 2vh; }
+    header h1 {
+      font-size: clamp(2.5rem, 8vw, 4rem);
+      animation: bounce 2s infinite;
+      margin: 0;
+    }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+    main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 1.5rem;
+      width: 100%;
+      padding: 0 1rem;
+      transform: translateY(-10vh);
+    }
+    #laughBtn {
+      padding: 1rem 2rem;
+      font-size: 1.05rem;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      background: var(--text);
+      color: var(--bg1);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      transition: transform 0.15s;
+    }
+    #laughBtn:hover { transform: scale(1.05) rotate(-2deg); }
+    #joke {
+      font-size: 1.6rem;
+      max-width: 600px;
+      line-height: 1.4;
+      margin: 0;
+    }
+    footer {
+      flex: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      padding-bottom: 2vh;
+      width: 100%;
+    }
+    #ownerMsg {
+      font-size: 0.85rem;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0;
+    }
+    #ownerNote {
+      font-size: 0.8rem;
+      opacity: 0.85;
+      max-width: 600px;
+      margin: 0;
+    }
+    #secretContainer {
+      font-size: 0.9rem;
+      opacity: 0.85;
+      width: 100%;
+      max-width: 400px;
+    }
+    details { text-align: left; cursor: pointer; }
+    summary { list-style: none; margin: 0; }
+    summary::marker { display: none; }
+    textarea {
+      width: 100%;
+      font-family: inherit;
+      font-size: 0.9rem;
+      padding: 0.5rem;
+      border-radius: 10px;
+      border: 2px solid var(--text);
+      background: rgba(236,239,244,0.1);
+      color: var(--text);
+      resize: vertical;
+      min-height: 70px;
+      margin-top: 0.5rem;
+    }
+    #msgStatus { margin-top: 0.4rem; font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <header>
+    <br>
+    <h1>Welcome to my silly site!</h1>
+  </header>
+  <main>
+    <button id="laughBtn">Make me laugh 😆</button>
+    <p id="joke">Click the button for a random joke.</p>
+  </main>
+  <footer>
+    <div id="ownerMsg">Hi, I am Okuaki. I bought this domain just because it contains my name. You can say that I am reserving it for future use. So for now, enjoy some jokes. 😉</div>
+    <div id="ownerNote">I’m unsure what brought you here but feel free to leave a message.</div>
+    <div id="secretContainer">
+      <details>
+        <summary>✉️ Leave me a secret note</summary>
+        <form id="msgForm">
+          <textarea id="msgInput" maxlength="300" placeholder="Your (private) message here… (max 300 chars)" required></textarea>
+          <button type="submit">Send secretly</button>
+          <p id="msgStatus"></p>
+        </form>
+      </details>
+    </div>
+  </footer>
+  <script>
+    // On-click fetch a random joke for true randomness
+    async function getRandomJoke() {
+      try {
+        const res = await fetch('https://official-joke-api.appspot.com/jokes/random');
+        const { setup, punchline } = await res.json();
+        return `${setup} ${punchline}`;
+      } catch {
+        return 'Oops! Couldn\'t fetch a joke right now.';
+      }
+    }
+    const jokeEl = document.getElementById('joke');
+    document.getElementById('laughBtn').addEventListener('click', async () => {
+      jokeEl.textContent = 'Loading…';
+      const joke = await getRandomJoke();
+      jokeEl.textContent = joke;
+    });
+    // Secret message logic
+    document.getElementById('msgForm').addEventListener('submit', async e => {
+      e.preventDefault();
+      const text = document.getElementById('msgInput').value.trim();
+      if (!text) return;
+      const statusEl = document.getElementById('msgStatus');
+      statusEl.textContent = 'Sending…';
+      try {
+        const res = await fetch('/api/message', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text })
+        });
+        statusEl.textContent = res.ok ? 'Thanks! Your note is in the vault.' : 'Oops, try later.';
+        if (res.ok) e.target.reset();
+      } catch {
+        statusEl.textContent = 'Network error. Try again.';
+      }
+    });
+  </script>
+</body>
+</html>
